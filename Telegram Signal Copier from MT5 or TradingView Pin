@@ -1,0 +1,121 @@
+Telegram Signal Copier from MT5 or TradingView PineScript
+
+# ငါ ဒီလိုမျိုး Telegram Signal Copier — Copy Signals to TradingView & MT5 Automatically တစ်ခုရေးချင်တယ်
+
+
+# ဒါအ ခြားသူတွေရေးထားတဲ့ ပုံစံပါ
+'''
+https://github.com/oluklef17/telegram-mt4-mt5-signal-copier.git 
+https://github.com/oogunjob/FX-Signal-Copier-Telegram-Bot.git
+'''
+
+# အရင်ဆုံး ငါ့ကို Plan, System Architecture (စနစ်တစ်ခုလုံး၏ ဖွဲ့စည်းပုံ) & skills.md ကို အရင် လုပ်ပေးပါ၊ အခြားသူတွေ ရဲ့ skills.md  ရှိရင်လဲ ပြပေးပါ
+
+# Journal ပါ report ထုတ်တဲ့ စနစ်ထည့်ချင်တယ် daily or weekly (၎င်းကို MT5 or TradingView မှာ ရပြီးသားဆို မထည့်တော့ဘူး)
+
+
+
+# Telegram Signal for BUY
+GOLD BUY 4444
+MORE BUY 4442
+
+TP¹ 4447
+TP² 4450
+TP³ 4453
+TP⁴ 4456
+TP⁵ 4460
+
+SL_4433
+
+# Telegram Signal for SELL
+GOLD SELL 4421
+MORE SELL 4423
+
+TP¹ 4418
+TP² 4415
+TP³ 4412
+TP⁴ 4410
+TP⁵ 4407
+TP⁶ 4404
+
+SL_4432
+
+
+
+🏗 2. System Architecture (စနစ်တစ်ခုလုံး၏ ဖွဲ့စည်းပုံ)
+
+ဒီစနစ်ကို Event-Driven Architecture (ဖြစ်ရပ်အပေါ်အခြေခံသော စနစ်) ပုံစံမျိုး တည်ဆောက်ထားပါတယ်။ 
+
+အပိုင်း (၄) ပိုင်း ခွဲခြားထားပါတယ် -
+
+၁။ Input Layer (အချက်အလက် စုဆောင်းခြင်း)
+ 
+ # Telegram Live Stream: Telethon API client ကို အသုံးပြုပြီး သတ်မှတ်ထားတဲ့ Telegram Channel/Group တွေဆီက New Message Event တွေကို စက္ကန့်မလပ် စောင့်ကြည့်ဖမ်းယူပါတယ်။
+
+၂။ Processing Layer (အချက်အလက် ခွဲခြမ်းစိပ်ဖြာခြင်း)
+ 
+ # Regex / Parser Engine: ရလာတဲ့ Raw text တွေကို Logic အသုံးပြုပြီး သန့်စင်ပါတယ်။ ရွှေ သို့မဟုတ် သက်ဆိုင်ရာ Currency ဖြစ်မဖြစ်၊ Buy/Sell ခွဲခြားခြင်းနှင့် စျေးနှုန်းများကို ခွဲထုတ်ပါတယ်။
+
+ # Database (SQLite): ခွဲထုတ်ပြီးသား Signal အချက်အလက်များကို Trade ID နှင့်တကွ ပရောဂျက်အတွင်းရှိ Database ထဲသို့ ပို့ဆောင်သိမ်းဆည်းပါတယ်။
+
+၃။ Execution Layer (အမိန့်ပေး စေခိုင်းခြင်း)
+ 
+ # MT5 Broker Gateway: MetaTrader5 API မှတစ်ဆင့် Local PC သို့မဟုတ် VPS တွင် တိုက်ရိုက်ဖွင့်ထားသော Broker Terminal ထံသို့ Request ပို့ပြီး Order လှမ်းတင်ပါတယ်။
+ 
+ # Risk Manager: Account Balance အပေါ်မူတည်ပြီး ကုန်သွယ်မည့် Lot Size ကို အလိုအလျောက် တွက်ချက်ပေးပါတယ်။
+
+၄။ Reporting Layer (ပြန်လည် သတင်းပို့ခြင်း)
+ 
+ # APScheduler Engine: Background မှာ အမြဲ Run နေပြီး သတ်မှတ်ထားတဲ့ နေ့စဉ်/အပတ်စဉ် အချိန်ရောက်ရင် SQLite ထဲက Data တွေကို Pandas နဲ့ တွက်ချက်ပြီး Owner ဆီကို Telegram Journal Report ပြန်ပို့ပေးပါတယ်။
+
+---
+
+🛠 Technical Skills Required & Applied
+
+This document outlines the core technical competencies and software development skills applied in building the Telegram Signal Copier & Automated Trading Journal system.
+
+## 🐍 Backend Development (Python Core)
+- **Asynchronous Programming:** Utilized `asyncio` for non-blocking event listening on Telegram channels.
+- **Data Scripting & Automation:** Automated cron-jobs and periodic tasks using `APScheduler`.
+- **Error & Exception Handling:** Developed robust fail-safe mechanisms to handle improper signal text formats and broker requotes.
+
+## 📈 Algorithmic Trading & Finance
+- **MetaTrader 5 API:** Direct integration with MT5 terminals using Python's official `MetaTrader5` package for trade execution, lot-sizing, and order polling.
+- **Risk Management:** Programmed dynamic lot-sizing calculations based on account equity and stop-loss pip distance.
+- **Data Engineering:** Used `Pandas` for parsing historical trade logs and calculating performance metrics (Win Rate, Profit factor, Net Drawdown).
+
+## 🔍 Data Extraction & Processing
+- **Regular Expressions (Regex):** Created complex text parsing patterns to accurately extract data (`Symbol`, `Action`, `Entry`, `SL`, `TP`) from unstructured Telegram messages.
+- **Database Management:** Designed and managed a relational database using `SQLite3` to maintain an immutable trading journal log.
+
+## 🌐 DevOps & Infrastructure
+- **VPS Deployment:** Deploying and maintaining 24/7 runtime on Windows Server Virtual Private Servers (VPS).
+- **Environment Management:** Managing environment variables and secure credentials handling via `.env` configuration.
+
+---
+
+
+## Technical Competency matrix - Crypto/Forex Execution Bot
+
+### 1. Quantitative & Execution Skills (Advanced)
+- Order routing via MetaTrader5 Gateway & REST/Websockets APIs.
+- Slippage control and Latency optimization (aiming for <200ms execution).
+
+### 2. Software Architecture (Intermediate)
+- Event-Driven Design Patterns.
+- Database Schema designing for High-frequency log storing (PostgreSQL / SQLite).
+
+### 3. Data Wrangling (Intermediate)
+- Applied `Numpy` and `Pandas` for executing mathematical models behind trading reports.
+
+---
+
+## Project Tech Stack Breakdown
+
+* **Ingestion Engine:** Requires strong knowledge of Telegram Bot API or MTProto Client (`Telethon` / `Pyrogram`), focusing on stream concurrency.
+* **Parsing Core:** RegEx algorithms, String manipulation, and handling of multi-line message strings.
+* **Database:** Structured Query Language (SQL) basics, CRUD operations, and transaction commit-rollbacks.
+* **Integration:** Webhooks configuration and API integrations (TradingView Alerts to Python Webserver).
+
+---
+

@@ -1,0 +1,51 @@
+# === TELEGRAM ===
+telegram:
+  api_id: YOUR_API_ID            # From my.telegram.org
+  api_hash: YOUR_API_HASH
+  phone: "+959XXXXXXXXX"
+  session_name: signal_copier
+  channels: []                   # List of channel links or IDs
+  bot_token: YOUR_BOT_TOKEN      # From @BotFather (optional)
+
+# === EXECUTION PATH ===
+# Options: "mt5" | "tradingview" | "both"
+execution:
+  mode: "mt5"
+
+# === MT5 CONNECTION ===
+mt5:
+  server: "ICMarkets-Demo"
+  login: 12345678
+  password: "your_password"
+  enable: true
+
+# === TRADINGVIEW WEBHOOK (Path B) ===
+tradingview:
+  webhook_host: "0.0.0.0"
+  webhook_port: 5000
+  secret_token: "your_webhook_secret"
+  enable: false
+
+# === RISK MANAGEMENT ===
+risk:
+  default_lot_size: 0.01
+  risk_percent: 2.0              # % of balance to risk per trade
+  max_daily_loss: 500.0          # USD daily loss limit
+  max_consecutive_losses: 3      # Stop trading after N consecutive losses
+  max_spread: 50                 # Max spread in points
+  session_start: "00:00"
+  session_end: "23:59"
+
+# === REPORTING (JOURNAL) ===
+reporting:
+  daily_report_time: "23:30"     # 11:30 PM daily
+  weekly_report_day: "sunday"
+  weekly_report_time: "21:00"    # 9:00 PM Sunday
+  send_to_chat_id: "YOUR_CHAT_ID"
+  enable_daily: true
+  enable_weekly: true
+
+# === DATABASE ===
+database:
+  path: "data/signals.db"
+  enable: true
