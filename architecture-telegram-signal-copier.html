@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telegram Signal Copier — System Architecture</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #020617;
+      min-height: 100vh;
+      padding: 2rem;
+      color: white;
+    }
+    .container { max-width: 1300px; margin: 0 auto; }
+    .header { margin-bottom: 2rem; }
+    .header-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+    .pulse-dot { width: 12px; height: 12px; background: #22d3ee; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+    h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -.025em; }
+    .subtitle { color: #94a3b8; font-size: .875rem; margin-left: 1.75rem; }
+    .diagram-container { background: rgba(15,23,42,.5); border-radius: 1rem; border: 1px solid #1e293b; padding: 1.5rem; overflow-x: auto; }
+    svg { width: 100%; min-width: 1050px; display: block; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap: 1rem; margin-top: 2rem; }
+    .card { background: rgba(15,23,42,.5); border-radius: .75rem; border: 1px solid #1e293b; padding: 1.25rem; }
+    .card-header { display: flex; align-items: center; gap: .5rem; margin-bottom: .75rem; }
+    .card-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .card-dot.cyan { background: #22d3ee; }
+    .card-dot.emerald { background: #34d399; }
+    .card-dot.violet { background: #a78bfa; }
+    .card-dot.amber { background: #fbbf24; }
+    .card-dot.rose { background: #fb7185; }
+    .card-dot.orange { background: #fb923c; }
+    .card h3 { font-size: .875rem; font-weight: 600; }
+    .card ul { list-style: none; color: #94a3b8; font-size: .75rem; }
+    .card li { margin-bottom: .375rem; }
+    .footer { text-align: center; margin-top: 1.5rem; color: #475569; font-size: .75rem; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="header-row">
+      <div class="pulse-dot"></div>
+      <h1>Telegram Signal Copier — System Architecture</h1>
+    </div>
+    <p class="subtitle">Event-Driven Architecture · 4-Layer Design · MT5 + TradingView Dual Execution Path</p>
+  </div>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 1100 850">
+      <defs>
+        <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#64748b"/></marker>
+        <marker id="arr-cyan" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#22d3ee"/></marker>
+        <marker id="arr-emerald" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#34d399"/></marker>
+        <marker id="arr-violet" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#a78bfa"/></marker>
+        <marker id="arr-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#fb923c"/></marker>
+        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width=".5"/></pattern>
+      </defs>
+
+      <rect width="100%" height="100%" fill="url(#grid)"/>
+
+      <!-- Layer 1 -->
+      <rect x="15" y="35" width="1070" height="155" rx="10" fill="rgba(8,51,68,.08)" stroke="#22d3ee" stroke-width="1" stroke-dasharray="6,3" opacity="0.5"/>
+      <text x="25" y="55" fill="#22d3ee" font-size="11" font-weight="700">LAYER 1: INPUT LAYER (Signal Ingestion)</text>
+
+      <!-- Channel -->
+      <rect x="30" y="70" width="155" height="100" rx="6" fill="rgba(8,51,68,.4)" stroke="#22d3ee" stroke-width="1.5"/>
+      <text x="107" y="93" fill="white" font-size="11" font-weight="600" text-anchor="middle">Telegram Channels</text>
+      <text x="107" y="112" fill="#94a3b8" font-size="9" text-anchor="middle">Signal Providers</text>
+      <text x="107" y="126" fill="#94a3b8" font-size="8" text-anchor="middle">• Free Signals</text>
+      <text x="107" y="138" fill="#94a3b8" font-size="8" text-anchor="middle">• VIP Groups</text>
+      <text x="107" y="150" fill="#94a3b8" font-size="8" text-anchor="middle">• Private Channels</text>
+
+      <!-- Telethon -->
+      <rect x="270" y="70" width="170" height="100" rx="6" fill="rgba(8,51,68,.4)" stroke="#22d3ee" stroke-width="1.5"/>
+      <text x="355" y="92" fill="white" font-size="11" font-weight="600" text-anchor="middle">Telethon Client</text>
+      <text x="355" y="108" fill="#94a3b8" font-size="9" text-anchor="middle">Event-Driven Listener</text>
+      <text x="355" y="122" fill="#94a3b8" font-size="8" text-anchor="middle">• NewMessage Events</text>
+      <text x="355" y="134" fill="#94a3b8" font-size="8" text-anchor="middle">• MessageEdited Events</text>
+      <text x="355" y="146" fill="#94a3b8" font-size="8" text-anchor="middle">• OCR Fallback</text>
+
+      <!-- TV Webhook -->
+      <rect x="530" y="70" width="170" height="100" rx="6" fill="rgba(8,51,68,.4)" stroke="#22d3ee" stroke-width="1.5"/>
+      <text x="615" y="92" fill="white" font-size="11" font-weight="600" text-anchor="middle">TradingView Webhook</text>
+      <text x="615" y="108" fill="#94a3b8" font-size="9" text-anchor="middle">PineScript Alerts</text>
+      <text x="615" y="122" fill="#94a3b8" font-size="8" text-anchor="middle">• webhook:// Endpoint</text>
+      <text x="615" y="134" fill="#94a3b8" font-size="8" text-anchor="middle">• JSON Payload</text>
+      <text x="615" y="146" fill="#94a3b8" font-size="8" text-anchor="middle">• Alert Message Format</text>
+
+      <!-- Bot -->
+      <rect x="790" y="70" width="250" height="100" rx="6" fill="rgba(8,51,68,.4)" stroke="#22d3ee" stroke-width="1.5"/>
+      <text x="915" y="92" fill="white" font-size="11" font-weight="600" text-anchor="middle">Telegram Bot API</text>
+      <text x="915" y="108" fill="#94a3b8" font-size="9" text-anchor="middle">Secondary Ingestion</text>
+      <text x="915" y="122" fill="#94a3b8" font-size="8" text-anchor="middle">• python-telegram-bot</text>
+      <text x="915" y="134" fill="#94a3b8" font-size="8" text-anchor="middle">• Manual Signal Entry</text>
+      <text x="915" y="146" fill="#94a3b8" font-size="8" text-anchor="middle">• User Commands</text>
+
+      <line x1="185" y1="120" x2="268" y2="120" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arr-cyan)"/>
+      <line x1="440" y1="120" x2="528" y2="120" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arr-cyan)"/>
+      <line x1="700" y1="120" x2="788" y2="120" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arr-cyan)"/>
+
+      <!-- Layer 2 -->
+      <rect x="15" y="215" width="1070" height="180" rx="10" fill="rgba(6,78,59,.08)" stroke="#34d399" stroke-width="1" stroke-dasharray="6,3" opacity="0.5"/>
+      <text x="25" y="235" fill="#34d399" font-size="11" font-weight="700">LAYER 2: PROCESSING LAYER (Parse &amp; Validate)</text>
+
+      <line x1="355" y1="170" x2="355" y2="248" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arr-cyan)"/>
+      <line x1="615" y1="170" x2="615" y2="248" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arr-cyan)"/>
+
+      <!-- Parser -->
+      <rect x="30" y="255" width="240" height="120" rx="6" fill="rgba(6,78,59,.4)" stroke="#34d399" stroke-width="1.5"/>
+      <text x="150" y="278" fill="white" font-size="11" font-weight="600" text-anchor="middle">Signal Parser Engine</text>
+      <text x="150" y="298" fill="#94a3b8" font-size="9" text-anchor="middle">Regex + NLP Parsing</text>
+      <text x="150" y="315" fill="#94a3b8" font-size="8" text-anchor="middle">• Symbol Detection</text>
+      <text x="150" y="329" fill="#94a3b8" font-size="8" text-anchor="middle">• Buy/Sell/Limit/Stop</text>
+      <text x="150" y="343" fill="#94a3b8" font-size="8" text-anchor="middle">• Entry / SL / TP¹⁻ⁿ</text>
+      <text x="150" y="357" fill="#94a3b8" font-size="8" text-anchor="middle">• Lot Size Detection</text>
+
+      <!-- DB -->
+      <rect x="330" y="255" width="190" height="120" rx="6" fill="rgba(76,29,149,.4)" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="425" y="278" fill="white" font-size="11" font-weight="600" text-anchor="middle">Signal Database</text>
+      <text x="425" y="298" fill="#94a3b8" font-size="9" text-anchor="middle">SQLite/PostgreSQL</text>
+      <text x="425" y="315" fill="#94a3b8" font-size="8" text-anchor="middle">• signals table</text>
+      <text x="425" y="329" fill="#94a3b8" font-size="8" text-anchor="middle">• orders table</text>
+      <text x="425" y="343" fill="#94a3b8" font-size="8" text-anchor="middle">• journal table</text>
+      <text x="425" y="357" fill="#94a3b8" font-size="8" text-anchor="middle">• config table</text>
+
+      <!-- Risk -->
+      <rect x="580" y="255" width="200" height="120" rx="6" fill="rgba(136,19,55,.4)" stroke="#fb7185" stroke-width="1.5"/>
+      <text x="680" y="278" fill="white" font-size="11" font-weight="600" text-anchor="middle">Risk Manager</text>
+      <text x="680" y="298" fill="#94a3b8" font-size="9" text-anchor="middle">Lot Size Calculator</text>
+      <text x="680" y="315" fill="#94a3b8" font-size="8" text-anchor="middle">• Balance × Risk% / SL</text>
+      <text x="680" y="329" fill="#94a3b8" font-size="8" text-anchor="middle">• Max Drawdown Check</text>
+      <text x="680" y="343" fill="#94a3b8" font-size="8" text-anchor="middle">• Daily Loss Limit</text>
+      <text x="680" y="357" fill="#94a3b8" font-size="8" text-anchor="middle">• Consecutive Loss Filter</text>
+
+      <!-- Validator -->
+      <rect x="850" y="255" width="210" height="120" rx="6" fill="rgba(251,146,60,.3)" stroke="#fb923c" stroke-width="1.5"/>
+      <text x="955" y="278" fill="white" font-size="10" font-weight="600" text-anchor="middle">Signal Validator</text>
+      <text x="955" y="298" fill="#94a3b8" font-size="8" text-anchor="middle">• Duplicate Check</text>
+      <text x="955" y="315" fill="#94a3b8" font-size="8" text-anchor="middle">• Price Range Filter</text>
+      <text x="955" y="329" fill="#94a3b8" font-size="8" text-anchor="middle">• Symbol Whitelist</text>
+      <text x="955" y="343" fill="#94a3b8" font-size="8" text-anchor="middle">• Session/Trade Hours</text>
+
+      <line x1="270" y1="315" x2="328" y2="315" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-emerald)"/>
+      <line x1="520" y1="315" x2="578" y2="315" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-emerald)"/>
+
+      <!-- Layer 3 -->
+      <rect x="15" y="420" width="1070" height="220" rx="10" fill="rgba(120,53,15,.08)" stroke="#fbbf24" stroke-width="1" stroke-dasharray="6,3" opacity="0.5"/>
+      <text x="25" y="440" fill="#fbbf24" font-size="11" font-weight="700">LAYER 3: EXECUTION LAYER (Order Placement)</text>
+
+      <line x1="150" y1="375" x2="150" y2="455" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-emerald)"/>
+      <line x1="680" y1="375" x2="680" y2="455" stroke="#34d399" stroke-width="1.5" marker-end="url(#arr-emerald)"/>
+
+      <!-- Path A -->
+      <rect x="30" y="460" width="400" height="160" rx="8" fill="rgba(120,53,15,.35)" stroke="#fbbf24" stroke-width="2"/>
+      <text x="230" y="482" fill="#fbbf24" font-size="12" font-weight="700" text-anchor="middle">PATH A: MT5 DIRECT EXECUTION</text>
+
+      <rect x="45" y="495" width="160" height="110" rx="6" fill="rgba(120,53,15,.3)" stroke="#fbbf24" stroke-width="1.5"/>
+      <text x="125" y="518" fill="white" font-size="11" font-weight="600" text-anchor="middle">MT5 Gateway</text>
+      <text x="125" y="538" fill="#94a3b8" font-size="9" text-anchor="middle">MetaTrader5 Python API</text>
+      <text x="125" y="555" fill="#94a3b8" font-size="8" text-anchor="middle">• mt5.initialize()</text>
+      <text x="125" y="569" fill="#94a3b8" font-size="8" text-anchor="middle">• mt5.order_send()</text>
+      <text x="125" y="583" fill="#94a3b8" font-size="8" text-anchor="middle">• mt5.Position Get/Close</text>
+      <text x="125" y="597" fill="#94a3b8" font-size="8" text-anchor="middle">• Account Info</text>
+
+      <rect x="250" y="495" width="160" height="110" rx="6" fill="rgba(120,53,15,.3)" stroke="#fbbf24" stroke-width="1.5"/>
+      <text x="330" y="518" fill="white" font-size="11" font-weight="600" text-anchor="middle">MT5 Broker Terminal</text>
+      <text x="330" y="538" fill="#94a3b8" font-size="9" text-anchor="middle">Win / VPS</text>
+      <text x="330" y="555" fill="#94a3b8" font-size="8" text-anchor="middle">• Live / Demo Account</text>
+      <text x="330" y="569" fill="#94a3b8" font-size="8" text-anchor="middle">• AutoTrading</text>
+      <text x="330" y="583" fill="#94a3b8" font-size="8" text-anchor="middle">• Built-in Journal</text>
+      <text x="330" y="597" fill="#94a3b8" font-size="8" text-anchor="middle">• Expert Advisors</text>
+
+      <line x1="205" y1="550" x2="248" y2="550" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Path B -->
+      <rect x="470" y="460" width="590" height="160" rx="8" fill="rgba(251,146,60,.2)" stroke="#fb923c" stroke-width="2"/>
+      <text x="765" y="482" fill="#fb923c" font-size="12" font-weight="700" text-anchor="middle">PATH B: TRADINGVIEW WEBHOOK EXECUTION</text>
+
+      <rect x="485" y="495" width="160" height="110" rx="6" fill="rgba(251,146,60,.25)" stroke="#fb923c" stroke-width="1.5"/>
+      <text x="565" y="518" fill="white" font-size="11" font-weight="600" text-anchor="middle">Flask Webhook Server</text>
+      <text x="565" y="538" fill="#94a3b8" font-size="9" text-anchor="middle">REST API Endpoint</text>
+      <text x="565" y="555" fill="#94a3b8" font-size="8" text-anchor="middle">• POST /webhook/tv</text>
+      <text x="565" y="569" fill="#94a3b8" font-size="8" text-anchor="middle">• JSON Payload Parse</text>
+      <text x="565" y="583" fill="#94a3b8" font-size="8" text-anchor="middle">• Signature Verify</text>
+      <text x="565" y="597" fill="#94a3b8" font-size="8" text-anchor="middle">• Rate Limiting</text>
+
+      <rect x="685" y="495" width="180" height="110" rx="6" fill="rgba(251,146,60,.25)" stroke="#fb923c" stroke-width="1.5"/>
+      <text x="775" y="518" fill="white" font-size="11" font-weight="600" text-anchor="middle">TradingView Cloud</text>
+      <text x="775" y="538" fill="#94a3b8" font-size="9" text-anchor="middle">PineScript → Webhook</text>
+      <text x="775" y="555" fill="#94a3b8" font-size="8" text-anchor="middle">• Indicator Alerts</text>
+      <text x="775" y="569" fill="#94a3b8" font-size="8" text-anchor="middle">• Webhook URL Config</text>
+      <text x="775" y="583" fill="#94a3b8" font-size="8" text-anchor="middle">• Alert Message Format</text>
+
+      <line x1="645" y1="550" x2="683" y2="550" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arr-orange)"/>
+
+      <!-- Layer 4 -->
+      <rect x="15" y="665" width="1070" height="155" rx="10" fill="rgba(76,29,149,.08)" stroke="#a78bfa" stroke-width="1" stroke-dasharray="6,3" opacity="0.5"/>
+      <text x="25" y="685" fill="#a78bfa" font-size="11" font-weight="700">LAYER 4: REPORTING LAYER (Journal &amp; Analytics)</text>
+
+      <line x1="125" y1="605" x2="125" y2="700" stroke="#fbbf24" stroke-width="1" marker-end="url(#arr)"/>
+      <line x1="565" y1="605" x2="565" y2="700" stroke="#fb923c" stroke-width="1" marker-end="url(#arr)"/>
+
+      <!-- Journal -->
+      <rect x="30" y="700" width="240" height="100" rx="6" fill="rgba(76,29,149,.4)" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="150" y="723" fill="white" font-size="11" font-weight="600" text-anchor="middle">Journal Engine</text>
+      <text x="150" y="743" fill="#94a3b8" font-size="9" text-anchor="middle">APScheduler + Pandas</text>
+      <text x="150" y="760" fill="#94a3b8" font-size="8" text-anchor="middle">• Daily PnL Calculation</text>
+      <text x="150" y="774" fill="#94a3b8" font-size="8" text-anchor="middle">• Win Rate / Profit Factor</text>
+      <text x="150" y="788" fill="#94a3b8" font-size="8" text-anchor="middle">• Trade History Export</text>
+
+      <!-- Reporter -->
+      <rect x="330" y="700" width="240" height="100" rx="6" fill="rgba(76,29,149,.4)" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="450" y="723" fill="white" font-size="11" font-weight="600" text-anchor="middle">Telegram Reporter</text>
+      <text x="450" y="743" fill="#94a3b8" font-size="9" text-anchor="middle">Auto-Forward Reports</text>
+      <text x="450" y="760" fill="#94a3b8" font-size="8" text-anchor="middle">• Daily @ 23:30</text>
+      <text x="450" y="774" fill="#94a3b8" font-size="8" text-anchor="middle">• Weekly @ Sun 21:00</text>
+      <text x="450" y="788" fill="#94a3b8" font-size="8" text-anchor="middle">• CSV / HTML Attach</text>
+
+      <!-- Dashboard -->
+      <rect x="640" y="700" width="240" height="100" rx="6" fill="rgba(76,29,149,.4)" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="760" y="723" fill="white" font-size="11" font-weight="600" text-anchor="middle">Web Dashboard (Opt.)</text>
+      <text x="760" y="743" fill="#94a3b8" font-size="9" text-anchor="middle">Flask + Chart.js</text>
+      <text x="760" y="760" fill="#94a3b8" font-size="8" text-anchor="middle">• Real-time PnL Charts</text>
+      <text x="760" y="774" fill="#94a3b8" font-size="8" text-anchor="middle">• Open Positions</text>
+      <text x="760" y="788" fill="#94a3b8" font-size="8" text-anchor="middle">• Historical Performance</text>
+
+      <line x1="270" y1="750" x2="328" y2="750" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arr-violet)"/>
+
+      <!-- Legend -->
+      <rect x="930" y="700" width="140" height="120" rx="8" fill="rgba(15,23,42,.7)" stroke="#1e293b" stroke-width="1"/>
+      <text x="1000" y="718" fill="white" font-size="10" font-weight="600" text-anchor="middle">Legend</text>
+      <rect x="940" y="726" width="14" height="10" rx="2" fill="rgba(8,51,68,.4)" stroke="#22d3ee" stroke-width="1"/><text x="960" y="734" fill="#94a3b8" font-size="7">Input</text>
+      <rect x="940" y="742" width="14" height="10" rx="2" fill="rgba(6,78,59,.4)" stroke="#34d399" stroke-width="1"/><text x="960" y="750" fill="#94a3b8" font-size="7">Processing</text>
+      <rect x="940" y="758" width="14" height="10" rx="2" fill="rgba(120,53,15,.3)" stroke="#fbbf24" stroke-width="1"/><text x="960" y="766" fill="#94a3b8" font-size="7">Execution</text>
+      <rect x="940" y="774" width="14" height="10" rx="2" fill="rgba(76,29,149,.4)" stroke="#a78bfa" stroke-width="1"/><text x="960" y="782" fill="#94a3b8" font-size="7">Reporting</text>
+      <rect x="940" y="790" width="14" height="10" rx="2" fill="rgba(251,146,60,.25)" stroke="#fb923c" stroke-width="1"/><text x="960" y="798" fill="#94a3b8" font-size="7">Webhook</text>
+    </svg>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-header"><div class="card-dot cyan"></div><h3>📥 Input Layer</h3></div>
+      <ul>
+        <li>• Telethon Client — real-time event listener for Telegram channels</li>
+        <li>• TradingView Webhook — PineScript alerts → REST endpoint</li>
+        <li>• Telegram Bot API — manual signal entry via /trade command</li>
+        <li>• OCR Fallback — extract text from signal screenshots</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-dot emerald"></div><h3>⚙️ Processing Layer</h3></div>
+      <ul>
+        <li>• Regex Parser — symbol, action, entry, SL, TP extraction</li>
+        <li>• SQLite DB — raw signal + parsed order + journal storage</li>
+        <li>• Risk Manager — dynamic lot sizing based on balance</li>
+        <li>• Signal Validator — dupe check, price range, blacklist</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-dot amber"></div><h3>🚀 Execution Layer (Dual Path)</h3></div>
+      <ul>
+        <li>• Path A: MT5 Python API — direct order_send() to broker</li>
+        <li>• Path B: TV Webhook — Flask server → TradingView alerts</li>
+        <li>• Market, Limit, Stop orders — all 6 order types supported</li>
+        <li>• Modify/Close/Partial Close — order lifecycle management</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-dot violet"></div><h3>📊 Reporting Layer</h3></div>
+      <ul>
+        <li>• Daily Journal — PnL, win rate, trades count, drawdown</li>
+        <li>• Weekly Journal — performance trends, equity curve</li>
+        <li>• Auto-Forward — reports sent to Telegram owner</li>
+        <li>• CSV Export — full trade history for external analysis</li>
+      </ul>
+    </div>
+  </div>
+  <p class="footer">Telegram Signal Copier v1.0.0 • Event-Driven Architecture • MT5 + TradingView Dual Path</p>
+</div>
+</body>
+</html>
