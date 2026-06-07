@@ -1,33 +1,28 @@
-## 📁 File Paths (Created So Far)
-
-```
-📂 Project Root: D:\Forex\AI Vibe Codeing for FX\Telegram Signal Copier from MT5 or TradingView PineScript
-```
 
 ### 📄 Documentation Files
 
 | File | Full Path |
 |------|-----------|
-| **README.md** | `D:\Forex\AI Vibe Codeing for FX\Telegram Signal Copier from MT5 or TradingView PineScript\README.md` |
-| **PLAN.md** | `...\PLAN.md` |
-| **SKILL.md** | `...\SKILL.md` |
-| **SOP.md** | `...\SOP.md` |
-| **architecture-....html** | `...\architecture-telegram-signal-copier.html` |
-| **config.yaml** | `...\config.yaml` |
+| **README.md** | `.\README.md` |
+| **PLAN.md** | `.\PLAN.md` |
+| **SKILL.md** | `.\SKILL.md` |
+| **SOP.md** | `.\SOP.md` |
+| **architecture-....html** | `.\architecture-telegram-signal-copier.html` |
+| **config.yaml** | `.\config.yaml` |
 
 ### 📁 Data Files
 
 | File | Full Path |
 |------|-----------|
-| **keywords.json** | `...\data\keywords.json` |
-| **symbols.txt** | `...\data\symbols.txt` |
+| **keywords.json** | `.\data\keywords.json` |
+| **symbols.txt** | `.\data\symbols.txt` |
 
 ### 📁 Docs Folder
 
 | File | Full Path |
 |------|-----------|
-| **REFERENCE_ANALYSIS.md** | `...\docs\REFERENCE_ANALYSIS.md` |
-| **UNIFIED_DESIGN.md** | `...\docs\UNIFIED_DESIGN.md` |
+| **REFERENCE_ANALYSIS.md** | `.\docs\REFERENCE_ANALYSIS.md` |
+| **UNIFIED_DESIGN.md** | `.\docs\UNIFIED_DESIGN.md` |
 
 ---
 
@@ -53,4 +48,4 @@ src/reporting/telegram_reporter.py ❌ မရှိသေး
 src/reporting/report_templates.py ❌ မရှိသေး
 ```
 
-`PLAN.md` ထဲမှာ Code တွေအပြည့်ရေးပြီးသားပါ။ အခုစပြီး **Source Code (.py) ဖိုင်တွေ** စရေးပေးပါရစေလား?
+`PLAN.md` ထဲမှာ **Source Code (.py) ဖိုင်တွေ** တွေအပြည့်ရေးပြီးသား။
